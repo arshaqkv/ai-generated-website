@@ -14,8 +14,12 @@
     "axios": "^1.10.0",
     "dotenv": "^17.2.0",
     "grapesjs": "^0.22.11",
+    "grapesjs-blocks-basic": "^1.0.2",
+    "grapesjs-plugin-forms": "^2.0.6",
+    "grapesjs-preset-webpage": "^1.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {

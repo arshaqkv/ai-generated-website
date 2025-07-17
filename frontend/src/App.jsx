@@ -1,11 +1,13 @@
-import React from 'react'
+import Builder from "./pages/Builder";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
     <div>
-      <h1 className='font-extrabold'>Hello</h1>
+      <Toaster />
+      <Builder />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
