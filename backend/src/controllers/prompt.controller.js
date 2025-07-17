@@ -2,38 +2,55 @@ import { openai } from "../openai/setup.js";
 import { HttpStatus } from "../utils/http.status.js";
 
 export const handlePrompt = async (req, res) => {
-  const { purpose, sections, colorScheme, typography, brandName, language } =
-    req.body;
+  const { prompt } = req.body;
 
-  if (
-    !purpose ||
-    !sections ||
-    !colorScheme ||
-    !typography ||
-    !brandName ||
-    !language
-  ) {
-    return res
-      .status(HttpStatus.BAD_REQUEST)
-      .json({ success: false, message: "All fields required" });
+  const validationPrompt = `
+You are an assistant that checks if a website prompt contains:
+          - Purpose of the website (e.g., course selling, workshop)
+          - Section layout (e.g., header, faq, footer)
+          - Color scheme or theme,if not specified use dark theme.
+          - Language preference, default is english
+
+
+User Prompt: "${prompt}"
+
+Respond with:
+{
+  "is_complete": true | false,
+  "missing_fields": [],
+  "suggest_questions": []
+}
+`;
+
+  const validation = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: validationPrompt }],
+    temperature: 0,
+  });
+
+  const validationResult = JSON.parse(validation.choices[0].message.content);
+
+  // If it's incomplete, ask the frontend to clarify
+  if (!validationResult.is_complete) {
+    return res.json({
+      missing_fields: validationResult.missing_fields,
+      suggest_questions: validationResult.suggest_questions,
+    });
   }
 
-  const prompt = `
-You are an assistant that generates modular HTML content with inline styles only, compatible with GrapesJS.
+  const promptData = `Generate a modern website based on this prompt:
 
-Brand: ${brandName}
-Purpose: ${purpose}
-Sections: ${sections.join(", ")}
-Color Scheme: ${colorScheme}
-Typography: ${typography}
-Language: ${language}
+"${prompt}",
+
+You are a frontend mentor that generates modular HTML content with inline styles only, compatible with GrapesJS.
+
 
 Rules:
-- Use inline CSS only.
-- Do not use <style>, <script>, or external classes.
-- Use only <div>, <h1>-<h4>, <p>, <img>, <button>.
+- Do not use <style> or external classes.
+- use modern style with color combination
+- use shadow for boxes and hover effect.
 - Each section must be clearly separated and editable.
-- Return ONLY valid HTML — no extra descriptions or explanations.
+- Use clean HTML (no html, <head>, <body>) and other explanations.
   `;
 
   try {
@@ -43,23 +60,17 @@ Rules:
         {
           role: "system",
           content:
-            "You generate modular HTML with inline styles for a visual website editor.",
+            "You generate modular HTML with inline styles compatible with GrapesJs.",
         },
-        { role: "user", content: prompt },
+        { role: "user", content: promptData },
       ],
       temperature: 0.7,
     });
 
     const aiHTML = response.choices[0]?.message?.content;
+    const cleanedHtml = aiHTML.replace(/^```html|```$/g, "").trim();
 
-    console.log(aiHTML)
-    if (!aiHTML) {
-      return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ success: false, message: "No response from AI" });
-    }
-
-    res.status(HttpStatus.CREATED).json({ success: true, html: aiHTML });
+    res.status(HttpStatus.CREATED).json({ success: true, html: cleanedHtml });
   } catch (error) {
     console.log("OpenAI Error:", error);
     res
