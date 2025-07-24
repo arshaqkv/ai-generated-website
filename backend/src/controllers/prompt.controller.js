@@ -6,10 +6,10 @@ export const handlePrompt = async (req, res) => {
 
   const validationPrompt = `
 You are an assistant that checks if a website prompt contains:
-          - Purpose of the website (e.g., course selling, workshop)
+          - Purpose of the website - (e.g., course selling, workshop)
           - Section layout (e.g., header, faq, footer)
-          - Color scheme or theme,if not specified use dark theme.
-          - Language preference, default is english
+          - Color scheme or theme,use dark theme if no color provided.
+          - Language preference, choose english as default language
 
 
 User Prompt: "${prompt}"
@@ -72,7 +72,15 @@ Rules:
 
     res.status(HttpStatus.CREATED).json({ success: true, html: cleanedHtml });
   } catch (error) {
-    console.log("OpenAI Error:", error);
+    console.log("OpenAI Error:", error.message);
+
+    if (error.status === 429) {
+      return res.status(HttpStatus.LIMIT_REACHED).json({
+        success: false,
+        message:
+          "Rate limit exceeded. Try again later.",
+      });
+    }
     res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "Internal server error" });
