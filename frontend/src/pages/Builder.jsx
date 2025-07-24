@@ -4,7 +4,7 @@ import PromptForm from "../components/PromptForm";
 import GrapesEditor from "../components/GrapesEditor";
 import ClarifierModal from "../components/ClarifierModal";
 import toast from "react-hot-toast";
-import { ArrowRight, CommandIcon } from "lucide-react";
+import { CommandIcon } from "lucide-react";
 
 const BACKEND = import.meta.env.VITE_APP_BACKEND_URL;
 

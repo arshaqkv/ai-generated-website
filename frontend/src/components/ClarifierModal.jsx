@@ -6,7 +6,9 @@ export default function ClarifierModal({ questions, onClose }) {
       aria-modal="true"
     >
       <div className="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md relative">
-        <h2 className="text-xl font-semibold mb-4 text-white">We need more info</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">
+          We need more info
+        </h2>
 
         <ul className="list-disc pl-6 mb-4 text-gray-200 space-y-2">
           {questions.map((q, idx) => (
